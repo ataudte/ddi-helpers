@@ -1,0 +1,55 @@
+# ======================
+# Python
+# ======================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# ======================
+# Shell & PowerShell
+# ======================
+# Logs and temp files
+*.log
+*.out
+*.tmp
+
+# PowerShell specific
+*.ps1xml
+*.psc1
+*.psd1
+*.psm1
+*.pssc
+*.cdxml
+
+# Ignore generated scripts or transcripts
+*.transcript.txt
+
+# ======================
+# BBEdit
+# ======================
+# BBEdit temporary and backup files
+*~.bbedittemp
+*~
+
+# ======================
+# OS-specific
+# ======================
+.DS_Store
+Thumbs.db
+
+# ======================
+# Editor swap/backup files
+# ======================
+*.swp
+*.swo
+*.bak
