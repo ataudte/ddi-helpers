@@ -1,11 +1,7 @@
 # check_xmls.sh
 
 ## Description
-This script scans a given directory for `.zip` files and verifies whether each contains expected DHCP and DNS XML configuration files:
-
-- `*_dhcp.xml`
-- `*_dns-config.xml`
-
+This script scans a given directory for `.zip` files and verifies whether each contains expected DHCP and DNS XML configuration files (`*_dhcp.xml`, `*_dns-config.xml`).
 It logs missing files and errors into separate CSV reports.
 
 ---

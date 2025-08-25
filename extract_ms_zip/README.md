@@ -1,11 +1,7 @@
 # extract_ms_zip.sh
 
 ## Description
-This script extracts Microsoft DNS/DHCP export archives that match the naming pattern:
-```
-MS-DNS-DHCP_*.zip
-```
-(case-insensitive).  
+This script extracts Microsoft DNS/DHCP export archives that match the naming pattern `MS-DNS-DHCP_*.zip` (case-insensitive).
 Each archive is extracted into its own subfolder under an `exports/` directory, and the script reports whether the extracted content contains a `dbs/` folder (commonly used for DNS zone files).
 
 ---

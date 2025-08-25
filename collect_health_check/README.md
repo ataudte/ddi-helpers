@@ -1,9 +1,7 @@
 # collect_health_check.sh
 
 ## Description
-This script automates the collection of health check data from a **BlueCat deployment**, including both:  
-- **BlueCat DNS/DHCP Servers (BDDS)**  
-- **BlueCat Address Manager (BAM)**  
+This script automates the collection of health check data from a **BlueCat deployment**, including both **BlueCat DNS/DHCP Servers (BDDS)** and **BlueCat Address Manager (BAM)**.
 
 It executes health and support utilities (`datarake.sh`, `bdds_health.sh`, `backup.pl`), retrieves generated logs and support bundles from BDDS and BAM, and stores all artifacts in a centralized timestamped folder under `/tmp/YYYY-MM`.
 
