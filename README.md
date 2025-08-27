@@ -477,6 +477,16 @@ It iterates through a list of FQDNs, queries a specified DNS server for a given 
 </details>
 
 <details>
+  <summary>parse_ms-dns_xml</summary>
+
+* [parse_ms-dns_xml.py](parse_ms-dns_xml/parse_ms-dns_xml.py)
+
+Parses a Microsoft DNS XML export file and extracts a **quick overview** of a single server's configuration.
+Extracts Server name, Zone names, Master server IPs, and Global forwarders. Intended as a lightweight helper script for analyzing a **single** XML file.
+
+</details>
+
+<details>
   <summary>ptr_clean-up</summary>
 
 * [ptr_clean-up.sh](ptr_clean-up/ptr_clean-up.sh)
