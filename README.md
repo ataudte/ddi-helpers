@@ -14,6 +14,15 @@ The repository contains scripts in **Python**, **Shell**, and **PowerShell**.
 
 ## Directory Listing
 <details>
+  <summary>ascii_cleaner</summary>
+
+* [ascii_cleaner.py](ascii_cleaner/ascii_cleaner.py)
+
+Convert flat export files to ASCII for legacy import tools. Processes all files with a given extension in a target folder, preferring `iconv` UTF‑8→ASCII with transliteration, then `iconv` with `//ignore`, and finally a Python fallback that applies a German transliteration map (Ä→Ae, Ö→Oe, Ü→Ue, ä→ae, ö→oe, ü→ue, ß→ss). Cleaned files go to `ascii_cleaned/`; detailed per‑file logs for issues go to `ascii_cleaned/logs/`.
+
+</details>
+
+<details>
   <summary>backup_ipctrl</summary>
 
 * [backup_ipctrl.ps1](backup_ipctrl/backup_ipctrl.ps1)
