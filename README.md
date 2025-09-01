@@ -541,6 +541,16 @@ The script filters those directives, then generates a fully expanded normalized 
 </details>
 
 <details>
+  <summary>qip_overview</summary>
+
+* [qip_overview.py](qip_overview/qip_overview.py)
+
+Generates a compact, operator‑friendly overview of a QIP export (QEF files). It parses the export directory and writes CSV overviews for zones, subnets (v4/v6), ranges, and more.
+DHCP pools and reservations are derived directly from `obj_prof.qef` to match production behavior, with numeric sorting and CIDR‑aware metadata.
+
+</details>
+
+<details>
   <summary>random_nsupdate</summary>
 
 * [random_nsupdate.dh](random_nsupdate/random_nsupdate.dh)
