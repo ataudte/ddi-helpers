@@ -21,24 +21,61 @@ OUT_NORM="${BASENAME}_normalized.${EXT}"
 # - Comment 'directory' and 'dnssec-enable' lines (outside of comments)
 # - Comment entire 'qddns' blocks (including sub-blocks)
 awk '
-/^[ \t]*directory[ \t]+/ && $0 !~ /^[ \t]*#/ {print "#" $0; next}
-/^[ \t]*dnssec-enable[ \t]+/ && $0 !~ /^[ \t]*#/ {print "#" $0; next}
-/^[ \t]*qddns[ \t]*\{/ && $0 !~ /^[ \t]*#/ {
+BEGIN { in_qddns=0; qddns_pending=0; depth=0 }
+
+# comment out single-line directives we don’t want
+/^[[:space:]]*directory[[:space:]]+"/      { print "#" $0; next }
+/^[[:space:]]*dnssec-enable[[:space:]]+/   { print "#" $0; next }
+
+# ---- qddns start (same line with "{", or without it) ----
+/^[[:space:]]*qddns([[:space:]]*;)?[[:space:]]*$/ {
+  # bare "qddns" on its own line (no "{")
+  qddns_pending=1
   print "#" $0
-  in_qddns=1
   next
 }
-in_qddns {
-  if ($0 ~ /\}/) {
-    print "#" $0
-    in_qddns=0
-  } else {
-    print "#" $0
+/^[[:space:]]*qddns[[:space:]]*\{/ {
+  # "qddns {" on the same line
+  in_qddns=1
+  # count braces without altering the line
+  tmp=$0; opens=gsub(/\{/, "", tmp)
+  tmp=$0; closes=gsub(/\}/, "", tmp)
+  depth = opens - closes
+  print "#" $0
+  next
+}
+
+# ---- line(s) immediately after a bare "qddns" ----
+qddns_pending && !in_qddns {
+  # comment this line
+  print "#" $0
+  # start depth tracking once we encounter the first "{"
+  tmp=$0; opens=gsub(/\{/, "", tmp)
+  tmp=$0; closes=gsub(/\}/, "", tmp)
+  if (opens > 0) {
+    in_qddns=1
+    depth = opens - closes
+    qddns_pending=0
+    if (depth <= 0) { in_qddns=0; depth=0 }
   }
   next
 }
-{print}
+
+# ---- inside qddns: comment everything (including nested edup {...}) ----
+in_qddns {
+  tmp=$0; opens=gsub(/\{/, "", tmp)
+  tmp=$0; closes=gsub(/\}/, "", tmp)
+  depth += opens - closes
+  print "#" $0
+  if (depth <= 0) { in_qddns=0; depth=0 }
+  next
+}
+
+# default: pass through
+{ print }
 ' "$INPUT" > "$OUT_TMP"
+
+
 
 # Now run named-checkconf
 named-checkconf -p "$OUT_TMP" > "$OUT_NORM"
