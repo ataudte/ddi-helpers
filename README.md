@@ -166,6 +166,16 @@ This script parses the ISC DHCP **leases file** and counts:
 </details>
 
 <details>
+  <summary>csv_matcher</summary>
+
+* [csv_matcher.sh](csv_matcher/csv_matcher.sh)
+
+This script filters rows from a data CSV into **match** and **miss** files based on wildcard patterns stored in a values CSV.  
+It supports per-file delimiters, case-insensitive matching by default, and `*` wildcards for prefix, suffix, and substring matches.
+
+</details>
+
+<details>
   <summary>ddns_utils</summary>
 
 * [ddns_clean-up.sh](ddns_utils/ddns_clean-up.sh)
