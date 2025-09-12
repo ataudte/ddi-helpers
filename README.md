@@ -318,6 +318,16 @@ This PowerShell script exports both **DNS and DHCP configuration** from a Micros
 </details>
 
 <details>
+  <summary>extract_ms-dhcp_macs</summary>
+
+* [extract_ms-dhcp_macs.py](extract_ms-dhcp_macs/extract_ms-dhcp_macs.py)
+
+This script extracts MAC-to-IP mappings from a Microsoft DHCP Server XML export.  
+It generates a complete list of all MACs and their associated IPs and a filtered list showing only MACs with multiple IPs.
+
+</details>
+
+<details>
   <summary>extract_ms_zip</summary>
 
 * [extract_ms_zip.sh](extract_ms_zip/extract_ms_zip.sh)
