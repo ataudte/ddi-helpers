@@ -217,6 +217,15 @@ It includes the subnet address, subnet mask, and CIDR notation.
 </details>
 
 <details>
+  <summary>dhcpd-conf_review</summary>
+
+* [dhcpd-conf_review.py](dhcpd-conf_review)
+
+Parses an ISC DHCPD configuration file (`dhcpd.conf`) and exports structured CSVs: **Scopes** (subnets / shared-networks), **Reservations** (hosts) and **Options** (global, scope, host). Columns use `number|name` when a DHCP option number is known (e.g., `6|domain_name_servers`).
+
+</details>
+
+<details>
   <summary>dig_bulk</summary>
 
 * [dig_bulk.sh](dig_bulk)
@@ -411,6 +420,15 @@ A Perl script that connects to an **LDAP/Active Directory** server, searches for
 * [get_vendor-classes.sh](get_vendor-classes)
 
 This script analyzes a **Microsoft DHCP XML export** and extracts information about **Vendor Classes** and their DHCP options.  
+
+</details>
+
+<details>
+  <summary>ib_onedb_overview</summary>
+
+* [ib_onedb_overview.py](ib_onedb_overview)
+
+Parses an **Infoblox OneDB** XML export (`onedb.xml`) and generates CSV summaries for **DNS zones** (zone type, primaries, forwarders, AD integration, Dynamic DNS settings) and **DHCP** configuration (networks, ranges, reservations, custom DHCP options). Zones are grouped by DNS view and can be filtered or split per view.
 
 </details>
 
