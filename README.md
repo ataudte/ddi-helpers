@@ -397,6 +397,16 @@ For each zone file, it extracts the zone name from the SOA record and creates a 
 </details>
 
 <details>
+  <summary>gen_opt-119</summary>
+
+* [gen_opt-119.py](gen_opt-119)
+
+Encodes a list of domain search suffixes into the **RFC 3397 binary format** used for DHCP option 119 (“Domain Search List”).  
+Supports standard compact hex output as well as **Microsoft DHCP “Byte Array”** format (for manual entry in the DHCP MMC).
+
+</details>
+
+<details>
   <summary>get_ipctrl_logs</summary>
 
 * [get_ipctrl_logs.sh](get_ipctrl_logs)
