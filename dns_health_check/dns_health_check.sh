@@ -208,12 +208,41 @@ else
 fi
 
 # DKIM (TXT) records
-DKIM_RECORD=$(dig TXT default._domainkey.$DOMAIN +short @$DNS_SERVER)
-if [[ -z "$DKIM_RECORD" ]]; then
-  msg "No DKIM record found!" "warn"
+DKIM_SELECTORS=${DKIM_SELECTORS:-"\
+                 cf1        # Cloudflare
+                 csi        # Cisco IronPort
+                 default    # Generic default
+                 dkim       # DKIM base selector
+                 dkim1      # DKIM increment 1
+                 dkim2      # DKIM increment 2
+                 email      # Generic email selector
+                 fm1        # Fastmail selector 1
+                 fm2        # Fastmail selector 2
+                 google     # Google Workspace legacy selector
+                 k1         # Mailchimp selector
+                 mail       # Generic mail selector
+                 s1         # Common SaaS selector 1
+                 s2         # Common SaaS selector 2
+                 selector   # Generic selector
+                 selector1  # Generic / Microsoft selector 1
+                 selector2  # Generic / Microsoft selector 2
+               "}
+FOUND_DKIM=()
+for SEL in $DKIM_SELECTORS; do
+  DKIM_RECORD=$(dig +short TXT "${SEL}._domainkey.${DOMAIN}" @"$DNS_SERVER")
+  if [[ -n "$DKIM_RECORD" ]]; then
+    # flatten possible multi-line TXT into a single line
+    DKIM_RECORD_ONELINE=$(echo "$DKIM_RECORD" | tr '\n' ' ')
+    FOUND_DKIM+=("${SEL}: ${DKIM_RECORD_ONELINE}")
+  fi
+done
+if ((${#FOUND_DKIM[@]} == 0)); then
+  msg "No DKIM records found for selectors: ${DKIM_SELECTORS}" "warn"
 else
-  msg "DKIM Records:"
-  msg "$(echo "$DKIM_RECORD" | tr '\n' ',' | sed 's/,$//')"
+  msg "DKIM records found:"
+  for entry in "${FOUND_DKIM[@]}"; do
+    msg "  ${entry}"
+  done
 fi
 
 # DMARC (TXT) records

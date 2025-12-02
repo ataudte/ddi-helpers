@@ -39,7 +39,7 @@ Example:
 - **Mail-related Records**
   - MX records
   - SPF (TXT)
-  - DKIM (`default._domainkey`)
+  - DKIM (most common selectors in practice)
   - DMARC (`_dmarc`)
 
 - **NS Configuration**
