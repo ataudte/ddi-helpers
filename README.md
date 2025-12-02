@@ -33,6 +33,15 @@ It runs `mysqldump.exe`, saves the export as a `.sql` file, compresses it into a
 </details>
 
 <details>
+  <summary>bam_access</summary>
+
+* [bam_access.sh](bam_access)
+
+This script automates direct user management on the BlueCat Address Manager (BAM) PostgreSQL backend. It checks for the existence of key users (`admin` or `bluecat`), updates their password to a predefined MD5 hash, or creates the `bluecat` user when missing. It is intended for controlled administrative recovery scenarios where API access is unavailable.
+
+</details>
+
+<details>
   <summary>bam_health</summary>
 
 * [bam_health.sh](bam_health)
