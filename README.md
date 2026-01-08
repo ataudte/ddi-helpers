@@ -297,6 +297,15 @@ The goal is to provide a clear overview of configuration health and identify iss
 </details>
 
 <details>
+  <summary>dns_ttl_watch</summary>
+
+* [dns_ttl_watch.sh](dns_ttl_watch)
+
+Interactive DNS watch tool that *paces itself by the observed TTL*. It runs repeated `dig` queries for a given FQDN and record type, prints the current TTL and answer values, then sleeps for **exactly the maximum TTL seen** before querying again. This is useful for seeing when a cached RRset expires and when answers (or TTLs) change.
+
+</details>
+
+<details>
   <summary>dns_zip2csv</summary>
 
 * [dns_zip2csv.sh](dns_zip2csv)
