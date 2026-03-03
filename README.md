@@ -657,6 +657,15 @@ It supports batch execution with optional parallelization, input validation, and
 </details>
 
 <details>
+  <summary>run_dnsaudit</summary>
+
+* [run_dnsaudit.sh](run_dnsaudit)
+
+Runs a DNS security scan for a given domain using the **dnsaudit.io** API.
+
+</details>
+
+<details>
   <summary>search_datarake</summary>
 
 * [search_datarake.sh](search_datarake)
