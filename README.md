@@ -12,7 +12,19 @@ The repository contains scripts in **Python**, **Shell**, and **PowerShell**.
 
 ---
 
-## Directory Listing
+## Table of Contents
+
+- [Data Preparation](#data-preparation)
+- [Exports and Migrations](#exports-and-migrations)
+- [Health Checks](#health-checks)
+- [DNS and Zone Files](#dns-and-zone-files)
+- [DHCP and Leases](#dhcp-and-leases)
+- [Parsers and Automation](#parsers-and-automation)
+
+---
+
+## Data Preparation
+
 <details>
   <summary>ascii_cleaner</summary>
 
@@ -23,6 +35,86 @@ Convert flat export files to ASCII for legacy import tools. Processes all files 
 </details>
 
 <details>
+  <summary>compare_pattern</summary>
+
+* [compare_pattern.sh](compare_pattern)
+
+This script compares two files by extracting all lines that contain a given search pattern.  
+It normalizes the matches and produces multiple output files, including raw matches, unique matches, common lines, and diffs.
+
+</details>
+
+<details>
+  <summary>convert_netmask-cidr</summary>
+
+* [convert_netmask-cidr.sh](convert_netmask-cidr)
+
+This script converts between **CIDR notation** (e.g., `/24`) and **netmask notation** (e.g., `255.255.255.0`) within a CSV file.  
+
+</details>
+
+<details>
+  <summary>csv_matcher</summary>
+
+* [csv_matcher.sh](csv_matcher)
+
+This script filters rows from a data CSV into **match** and **miss** files based on wildcard patterns stored in a values CSV.  
+It supports per-file delimiters, case-insensitive matching by default, and `*` wildcards for prefix, suffix, and substring matches.
+
+</details>
+
+<details>
+  <summary>file_merger</summary>
+
+* [file_merger.sh](file_merger)
+
+This script merges all files with a given suffix/extension from a specified directory into a single consolidated file.  
+The output file is named after the directory basename plus the chosen suffix.
+
+</details>
+
+<details>
+  <summary>gen_dummy_ipam</summary>
+
+* [gen_dummy_ipam.sh](gen_dummy_ipam)
+
+This script generates a **CSV file** containing all subnets derived from a given **CIDR network** and a target **subnet mask size**.  
+
+</details>
+
+<details>
+  <summary>merge_csvs</summary>
+
+* [merge_csvs.sh](merge_csvs)
+
+This script merges multiple **CSV files** from a given directory into one consolidated, timestamped CSV file.  
+It keeps only the header from the first file, merges the rest in sorted order, and provides statistics on line counts.  
+If the `ssconvert` tool is available, it also generates an Excel `.xls` version of the merged file.
+
+</details>
+
+<details>
+  <summary>replace_column</summary>
+
+* [replace_column.sh](replace_column)
+
+This script replaces all values in a specified **column of a CSV file** with a new value.  
+The modified data is saved into a new CSV file with the replacement value embedded in the filename.
+
+</details>
+
+<details>
+  <summary>umlauts</summary>
+
+* [umlauts.sh](umlauts)
+
+This script searches for files matching a given pattern under a specified directory, repairs double-encoded UTF-8 text, and transliterates German umlauts into ASCII equivalents.
+
+</details>
+
+## Exports and Migrations
+
+<details>
   <summary>backup_ipctrl</summary>
 
 * [backup_ipctrl.ps1](backup_ipctrl)
@@ -31,6 +123,95 @@ This PowerShell script creates a **MySQL backup** of the BlueCat IPControl datab
 It runs `mysqldump.exe`, saves the export as a `.sql` file, compresses it into a `.zip`, and manages retention by deleting old backups.
 
 </details>
+
+<details>
+  <summary>bdds_export</summary>
+
+* [bdds_export.sh](bdds_export)
+
+This script collects DNS and DHCP configuration data from a **BlueCat DNS/DHCP Server (BDDS)** and archives it into a compressed `.tar.gz` file.  
+It is intended for backup, migration, or troubleshooting scenarios.
+
+</details>
+
+<details>
+  <summary>dns_zip2csv</summary>
+
+* [dns_zip2csv.sh](dns_zip2csv)
+
+This script processes **ZIP archives** containing DNS export files and generates a **merged CSV summary** of all discovered zones.
+
+</details>
+
+<details>
+  <summary>export_dhcpd</summary>
+
+* [export_dhcpd.sh](export_dhcpd)
+
+This script extracts subnet configurations from an `dhcpd.conf` file based on a provided list of IPv4 CIDR ranges.  
+It validates prerequisites, cleans the input, processes the configuration, and produces a resulting configuration file with only the desired ranges.
+
+</details>
+
+<details>
+  <summary>export_ms-dns-dhcp</summary>
+
+* [export_ms-dns-dhcp.ps1](export_ms-dns-dhcp)
+
+This PowerShell script exports both **DNS and DHCP configuration** from a Microsoft Windows Server and packages the results into a ZIP archive for handover, backup, or migration purposes.
+
+</details>
+
+<details>
+  <summary>extract_ms_zip</summary>
+
+* [extract_ms_zip.sh](extract_ms_zip)
+
+This script extracts Microsoft DNS/DHCP export archives that match the naming pattern `MS-DNS-DHCP_*.zip` (case-insensitive).
+Each archive is extracted into its own subfolder under an `exports/` directory, and the script reports whether the extracted content contains a `dbs/` folder (commonly used for DNS zone files).
+
+</details>
+
+<details>
+  <summary>get_ipctrl_logs</summary>
+
+* [get_ipctrl_logs.sh](get_ipctrl_logs)
+
+This script collects all **IPControl log files** (`*.log*`) from the default installation directory (`/opt/incontrol`) and packages them into a compressed tarball for troubleshooting or support purposes.
+
+</details>
+
+<details>
+  <summary>ipctrl_importer</summary>
+
+* [ipctrl_importer.sh](ipctrl_importer)
+
+This script is a wrapper for running **IPControl CLI imports** with CSV files.  
+It validates input, runs the import, generates reject/error files, and reports runtime duration.
+
+</details>
+
+<details>
+  <summary>ipctrl_restore-reset</summary>
+
+* [ipctrl_restore-reset.sh](ipctrl_restore-reset)
+
+This script restores an IPControl database from a provided SQL dump (packaged as a `.zip` file).  
+It unpacks the SQL, stops the InControl service, starts MySQL, and loads the SQL dump into the database.
+
+</details>
+
+<details>
+  <summary>zone_from_zips</summary>
+
+* [zone_from_zips.sh](zone_from_zips)
+
+This script searches through a directory of ZIP archives, looks for a **specific zone file** inside each archive,  
+and extracts the matching files into a `_working/` subdirectory.  
+
+</details>
+
+## Health Checks
 
 <details>
   <summary>bam_access</summary>
@@ -53,16 +234,6 @@ and logs results into a timestamped log file.
 </details>
 
 <details>
-  <summary>bdds_export</summary>
-
-* [bdds_export.sh](bdds_export)
-
-This script collects DNS and DHCP configuration data from a **BlueCat DNS/DHCP Server (BDDS)** and archives it into a compressed `.tar.gz` file.  
-It is intended for backup, migration, or troubleshooting scenarios.
-
-</details>
-
-<details>
   <summary>bdds_health</summary>
 
 * [bdds_health.sh](bdds_health)
@@ -70,16 +241,6 @@ It is intended for backup, migration, or troubleshooting scenarios.
 Health check script for **BlueCat DNS/DHCP Server (BDDS)**.  
 It validates prerequisites, collects system and service status (CPU, memory, filesystem, processes), inspects **DNS (named)** and **DHCP (dhcpd)** services, summarizes DHCP lease states, and records BlueCat software version and applied patches.  
 All results are written to a timestamped logfile on the BDDS itself.
-
-</details>
-
-<details>
-  <summary>check_dhcp-options</summary>
-
-* [check_dhcp-options.sh](check_dhcp-options)
-
-This script validates a **Microsoft DHCP XML export** and checks whether each DHCP scope has all critical DHCP options defined.  
-It reports any missing options per scope.
 
 </details>
 
@@ -105,14 +266,79 @@ Results are logged to both the console (with color-coded output) and a timestamp
 </details>
 
 <details>
-  <summary>check_xmls</summary>
+  <summary>collect_health_check</summary>
 
-* [check_xmls.sh](check_xmls)
+* [collect_health_check.sh](collect_health_check)
 
-This script scans a given directory for `.zip` files and verifies whether each contains expected DHCP and DNS XML configuration files (`*_dhcp.xml`, `*_dns-config.xml`).
-It logs missing files and errors into separate CSV reports.
+This script automates the collection of health check data from a **BlueCat deployment**, including both **BlueCat DNS/DHCP Servers (BDDS)** and **BlueCat Address Manager (BAM)**.
 
 </details>
+
+<details>
+  <summary>dns_health_check</summary>
+
+* [dns_health_check.sh](dns_health_check)
+
+A comprehensive DNS health check script that validates delegation, authoritative servers, SOA records, DNSSEC, mail-related DNS entries, reachability, and network configuration for a given domain.
+
+</details>
+
+<details>
+  <summary>flush_jnl</summary>
+
+* [flush_jnl.sh](flush_jnl)
+
+This script starts a temporary **BIND (named)** instance using the local `named.conf`,  
+executes `rndc sync -clean` to flush all **.jnl journal files** into their corresponding **.db zone files**,  
+and then shuts the server down cleanly.
+
+</details>
+
+<details>
+  <summary>jnl_clean-up</summary>
+
+* [jnl_clean-up.sh](jnl_clean-up)
+
+This script safely removes **BIND journal (.jnl) files** from a BlueCat DNS server environment.  
+It stops the `named` service, backs up all `.jnl` files to a temporary folder, and deletes them from the live configuration directory.
+
+</details>
+
+<details>
+  <summary>pw_check</summary>
+
+* [pw_check.sh](pw_check)
+
+This script verifies which of up to **three provided passwords** are valid for logging into a list of BlueCat DNS/DHCP Servers (BDDS) over SSH.  
+It iterates through servers from a file, attempts password authentication, and logs the results.
+
+</details>
+
+<details>
+  <summary>pw_mgmt</summary>
+
+* [pw_mgmt.sh](pw_mgmt)
+
+Bulk **password rotation** for BlueCat DNS/DHCP Servers (BDDS).  
+For each BDDS listed in an input file, the script:
+1) Validates SSH access with the **current root password**.  
+2) Connects via SSH and runs `passwd -q <user>` non‑interactively to set a **new password** for the target user.  
+3) If the target user is `root`, it **re‑validates** SSH with the **new** password.  
+All steps are logged.
+
+</details>
+
+<details>
+  <summary>search_datarake</summary>
+
+* [search_datarake.sh](search_datarake)
+
+This script searches through `.tgz` archives in a given input directory for a **search string** within `daemon.log` files (including rotated and compressed versions).  
+It extracts only the matching log files into a `matched_logs` directory for further analysis, while cleaning up temporary data.
+
+</details>
+
+## DNS and Zone Files
 
 <details>
   <summary>check_zone</summary>
@@ -125,25 +351,6 @@ It can inject a missing `$ORIGIN` directive if needed, runs BIND’s `named-chec
 </details>
 
 <details>
-  <summary>collect_health_check</summary>
-
-* [collect_health_check.sh](collect_health_check)
-
-This script automates the collection of health check data from a **BlueCat deployment**, including both **BlueCat DNS/DHCP Servers (BDDS)** and **BlueCat Address Manager (BAM)**.
-
-</details>
-
-<details>
-  <summary>compare_pattern</summary>
-
-* [compare_pattern.sh](compare_pattern)
-
-This script compares two files by extracting all lines that contain a given search pattern.  
-It normalizes the matches and produces multiple output files, including raw matches, unique matches, common lines, and diffs.
-
-</details>
-
-<details>
   <summary>compare_zone_variants</summary>
 
 * [compare_zone_variants.sh](compare_zone_variants)
@@ -151,36 +358,6 @@ It normalizes the matches and produces multiple output files, including raw matc
 Compare **DNS zone file variants** that share the **same filename** but live in **different folders** under a root path.  
 The script gathers all matching files (by filename pattern), de‑duplicates identical content, cleans MS‑DNS artifacts, **canonicalizes** them with `named-checkzone`, normalizes records (ignore SOA, ignore TTL, lowercase), and then compares **variants of the same basename**.  
 Differences are logged; non‑identical canonical variants are preserved for review.
-
-</details>
-
-<details>
-  <summary>convert_netmask-cidr</summary>
-
-* [convert_netmask-cidr.sh](convert_netmask-cidr)
-
-This script converts between **CIDR notation** (e.g., `/24`) and **netmask notation** (e.g., `255.255.255.0`) within a CSV file.  
-
-</details>
-
-<details>
-  <summary>count_active_leases</summary>
-
-* [count_active_leases.sh](count_active_leases)
-
-This script parses the ISC DHCP **leases file** and counts:
-- **Active leases (unique IPs)**  
-- **Active clients (unique MAC addresses)**  
-
-</details>
-
-<details>
-  <summary>csv_matcher</summary>
-
-* [csv_matcher.sh](csv_matcher)
-
-This script filters rows from a data CSV into **match** and **miss** files based on wildcard patterns stored in a values CSV.  
-It supports per-file delimiters, case-insensitive matching by default, and `*` wildcards for prefix, suffix, and substring matches.
 
 </details>
 
@@ -202,35 +379,6 @@ Two shell scripts to **create/update** and **remove** DNS records by feeding `ns
 This script identifies **dependent DNS records** across multiple zones.  
 It performs zone transfers (AXFR) from the primary nameserver of each zone, then compares the transferred data with a given list of records to find dependencies.  
 Results are written into separate dependency reports for each zone.
-
-</details>
-
-<details>
-  <summary>dhcp-xml_review</summary>
-
-* [dhcp-xml_review.py](dhcp-xml_review)
-
-This Python script parses a **Microsoft DHCP XML export** and generates multiple structured CSV files for analysis.  
-It extracts server-wide options, scopes, reservations, and class assignments (VendorClass/UserClass).  
-
-</details>
-
-<details>
-  <summary>dhcpd_subnet-list</summary>
-
-* [dhcpd_subnet-list.sh](dhcpd_subnet-list)
-
-This script extracts all **subnet definitions** from an ISC DHCP configuration file (`dhcpd.conf`) and exports them into a CSV file.  
-It includes the subnet address, subnet mask, and CIDR notation.
-
-</details>
-
-<details>
-  <summary>dhcpd-conf_review</summary>
-
-* [dhcpd-conf_review.py](dhcpd-conf_review)
-
-Parses an ISC DHCPD configuration file (`dhcpd.conf`) and exports structured CSVs: **Scopes** (subnets / shared-networks), **Reservations** (hosts) and **Options** (global, scope, host). Columns use `number|name` when a DHCP option number is known (e.g., `6|domain_name_servers`).
 
 </details>
 
@@ -277,15 +425,6 @@ Logs are written to `dns_diff_tool.log`.
 </details>
 
 <details>
-  <summary>dns_health_check</summary>
-
-* [dns_health_check.sh](dns_health_check)
-
-A comprehensive DNS health check script that validates delegation, authoritative servers, SOA records, DNSSEC, mail-related DNS entries, reachability, and network configuration for a given domain.
-
-</details>
-
-<details>
   <summary>dns_review</summary>
 
 * [dns_review.sh](dns_review)
@@ -306,15 +445,6 @@ Interactive DNS watch tool that *paces itself by the observed TTL*. It runs repe
 </details>
 
 <details>
-  <summary>dns_zip2csv</summary>
-
-* [dns_zip2csv.sh](dns_zip2csv)
-
-This script processes **ZIP archives** containing DNS export files and generates a **merged CSV summary** of all discovered zones.
-
-</details>
-
-<details>
   <summary>dublicated_entries</summary>
 
 * [dublicated_entries.sh](dublicated_entries)
@@ -322,55 +452,6 @@ This script processes **ZIP archives** containing DNS export files and generates
 This script validates DNS zone files for **duplicate entries**:  
 - Hosts mapped to multiple IP addresses.  
 - IP addresses mapped to multiple hosts.  
-
-</details>
-
-<details>
-  <summary>export_dhcpd</summary>
-
-* [export_dhcpd.sh](export_dhcpd)
-
-This script extracts subnet configurations from an `dhcpd.conf` file based on a provided list of IPv4 CIDR ranges.  
-It validates prerequisites, cleans the input, processes the configuration, and produces a resulting configuration file with only the desired ranges.
-
-</details>
-
-<details>
-  <summary>export_ms-dns-dhcp</summary>
-
-* [export_ms-dns-dhcp.ps1](export_ms-dns-dhcp)
-
-This PowerShell script exports both **DNS and DHCP configuration** from a Microsoft Windows Server and packages the results into a ZIP archive for handover, backup, or migration purposes.
-
-</details>
-
-<details>
-  <summary>extract_ms-dhcp_macs</summary>
-
-* [extract_ms-dhcp_macs.py](extract_ms-dhcp_macs)
-
-This script extracts MAC-to-IP mappings from a Microsoft DHCP Server XML export.  
-It generates a complete list of all MACs and their associated IPs and a filtered list showing only MACs with multiple IPs.
-
-</details>
-
-<details>
-  <summary>extract_ms_zip</summary>
-
-* [extract_ms_zip.sh](extract_ms_zip)
-
-This script extracts Microsoft DNS/DHCP export archives that match the naming pattern `MS-DNS-DHCP_*.zip` (case-insensitive).
-Each archive is extracted into its own subfolder under an `exports/` directory, and the script reports whether the extracted content contains a `dbs/` folder (commonly used for DNS zone files).
-
-</details>
-
-<details>
-  <summary>file_merger</summary>
-
-* [file_merger.sh](file_merger)
-
-This script merges all files with a given suffix/extension from a specified directory into a single consolidated file.  
-The output file is named after the directory basename plus the chosen suffix.
 
 </details>
 
@@ -385,129 +466,12 @@ It optionally filters out reverse zones and outputs a CSV containing all duplica
 </details>
 
 <details>
-  <summary>flush_jnl</summary>
-
-* [flush_jnl.sh](flush_jnl)
-
-This script starts a temporary **BIND (named)** instance using the local `named.conf`,  
-executes `rndc sync -clean` to flush all **.jnl journal files** into their corresponding **.db zone files**,  
-and then shuts the server down cleanly.
-
-</details>
-
-<details>
-  <summary>gen_dummy_ipam</summary>
-
-* [gen_dummy_ipam.sh](gen_dummy_ipam)
-
-This script generates a **CSV file** containing all subnets derived from a given **CIDR network** and a target **subnet mask size**.  
-
-</details>
-
-<details>
   <summary>gen_named</summary>
 
 * [gen_named.sh](gen_named)
 
 This script generates a minimal `named.conf` configuration file for BIND by scanning a directory of DNS zone files.  
 For each zone file, it extracts the zone name from the SOA record and creates a corresponding `zone` block.
-
-</details>
-
-<details>
-  <summary>gen_opt-119</summary>
-
-* [gen_opt-119.py](gen_opt-119)
-
-Encodes a list of domain search suffixes into the **RFC 3397 binary format** used for DHCP option 119 (“Domain Search List”).  
-Supports standard compact hex output as well as **Microsoft DHCP “Byte Array”** format (for manual entry in the DHCP MMC).
-
-</details>
-
-<details>
-  <summary>get_ipctrl_logs</summary>
-
-* [get_ipctrl_logs.sh](get_ipctrl_logs)
-
-This script collects all **IPControl log files** (`*.log*`) from the default installation directory (`/opt/incontrol`) and packages them into a compressed tarball for troubleshooting or support purposes.
-
-</details>
-
-<details>
-  <summary>get_ldap_groups</summary>
-
-* [get_ldap_groups.pl](get_ldap_groups)
-
-A Perl script that connects to an **LDAP/Active Directory** server, searches for a given user, and prints all groups (`memberOf`) the user belongs to.
-
-</details>
-
-<details>
-  <summary>get_vendor-classes</summary>
-
-* [get_vendor-classes.sh](get_vendor-classes)
-
-This script analyzes a **Microsoft DHCP XML export** and extracts information about **Vendor Classes** and their DHCP options.  
-
-</details>
-
-<details>
-  <summary>ib_onedb_overview</summary>
-
-* [ib_onedb_overview.py](ib_onedb_overview)
-
-Parses an **Infoblox OneDB** XML export (`onedb.xml`) and generates CSV summaries for **DNS zones** (zone type, primaries, forwarders, AD integration, Dynamic DNS settings) and **DHCP** configuration (networks, ranges, reservations, custom DHCP options). Zones are grouped by DNS view and can be filtered or split per view.
-
-</details>
-
-<details>
-  <summary>ipctrl_importer</summary>
-
-* [ipctrl_importer.sh](ipctrl_importer)
-
-This script is a wrapper for running **IPControl CLI imports** with CSV files.  
-It validates input, runs the import, generates reject/error files, and reports runtime duration.
-
-</details>
-
-<details>
-  <summary>ipctrl_restore-reset</summary>
-
-* [ipctrl_restore-reset.sh](ipctrl_restore-reset)
-
-This script restores an IPControl database from a provided SQL dump (packaged as a `.zip` file).  
-It unpacks the SQL, stops the InControl service, starts MySQL, and loads the SQL dump into the database.
-
-</details>
-
-<details>
-  <summary>jnl_clean-up</summary>
-
-* [jnl_clean-up.sh](jnl_clean-up)
-
-This script safely removes **BIND journal (.jnl) files** from a BlueCat DNS server environment.  
-It stops the `named` service, backs up all `.jnl` files to a temporary folder, and deletes them from the live configuration directory.
-
-</details>
-
-<details>
-  <summary>jumper</summary>
-
-* [jumper.sh](jumper)
-
-Interactive SSH helper script that allows you to select a server from a list and connect to it.  
-It validates input, checks connectivity, and logs all actions. Useful as a "jumper" or "bastion" tool for quickly connecting to servers from a predefined inventory.
-
-</details>
-
-<details>
-  <summary>merge_csvs</summary>
-
-* [merge_csvs.sh](merge_csvs)
-
-This script merges multiple **CSV files** from a given directory into one consolidated, timestamped CSV file.  
-It keeps only the header from the first file, merges the rest in sorted order, and provides statistics on line counts.  
-If the `ssconvert` tool is available, it also generates an Excel `.xls` version of the merged file.
 
 </details>
 
@@ -552,67 +516,12 @@ It iterates through a list of FQDNs, queries a specified DNS server for a given 
 </details>
 
 <details>
-  <summary>parse_ms-dns_xml</summary>
-
-* [parse_ms-dns_xml.py](parse_ms-dns_xml)
-
-Parses a Microsoft DNS XML export file and extracts a **quick overview** of a single server's configuration.
-Extracts Server name, Zone names, Master server IPs, and Global forwarders. Intended as a lightweight helper script for analyzing a **single** XML file.
-
-</details>
-
-<details>
   <summary>ptr_clean-up</summary>
 
 * [ptr_clean-up.sh](ptr_clean-up)
 
 This script validates and cleans up **reverse DNS (PTR) zones** in a BIND-style DNS setup.  
 It ensures that configuration and zone files are consistent, removes Microsoft DNS timestamps, canonicalizes the zones, and logs all actions.
-
-</details>
-
-<details>
-  <summary>pw_check</summary>
-
-* [pw_check.sh](pw_check)
-
-This script verifies which of up to **three provided passwords** are valid for logging into a list of BlueCat DNS/DHCP Servers (BDDS) over SSH.  
-It iterates through servers from a file, attempts password authentication, and logs the results.
-
-</details>
-
-<details>
-  <summary>pw_mgmt</summary>
-
-* [pw_mgmt.sh](pw_mgmt)
-
-Bulk **password rotation** for BlueCat DNS/DHCP Servers (BDDS).  
-For each BDDS listed in an input file, the script:
-1) Validates SSH access with the **current root password**.  
-2) Connects via SSH and runs `passwd -q <user>` non‑interactively to set a **new password** for the target user.  
-3) If the target user is `root`, it **re‑validates** SSH with the **new** password.  
-All steps are logged.
-
-</details>
-
-<details>
-  <summary>qip_named_normalizer</summary>
-
-* [qip_named_normalizer.sh](qip_named_normalizer)
-
-This script prepares a **QIP-exported BIND/named configuration file** for validation and normalization.  
-QIP configurations often include unsupported or environment-specific directives that can break `named-checkconf`.  
-The script filters those directives, then generates a fully expanded normalized configuration.
-
-</details>
-
-<details>
-  <summary>qip_overview</summary>
-
-* [qip_overview.py](qip_overview)
-
-Generates a compact, operator‑friendly overview of a QIP export (QEF files). It parses the export directory and writes CSV overviews for zones, subnets (v4/v6), ranges, and more.
-DHCP pools and reservations are derived directly from `obj_prof.qef` to match production behavior, with numeric sorting and CIDR‑aware metadata.
 
 </details>
 
@@ -627,51 +536,12 @@ It continuously generates random hostnames and IPv4 addresses and adds them to a
 </details>
 
 <details>
-  <summary>replace_column</summary>
-
-* [replace_column.sh](replace_column)
-
-This script replaces all values in a specified **column of a CSV file** with a new value.  
-The modified data is saved into a new CSV file with the replacement value embedded in the filename.
-
-</details>
-
-<details>
   <summary>reverse_from_network</summary>
 
 * [reverse_from_network.sh](reverse_from_network)
 
 This script converts a list of IPv4 networks in CIDR notation into corresponding **reverse DNS zones** (`in-addr.arpa`).  
 It supports `/8`, `/16`, and `/24` networks and generates a list of reverse zones.
-
-</details>
-
-<details>
-  <summary>run_all_servers</summary>
-
-* [run_all_servers.sh](run_all_servers)
-
-This script automates running **SSH commands** or performing **SCP file transfers** across multiple servers from a list.  
-It supports batch execution with optional parallelization, input validation, and logging.
-
-</details>
-
-<details>
-  <summary>run_dnsaudit</summary>
-
-* [run_dnsaudit.sh](run_dnsaudit)
-
-Runs a DNS security scan for a given domain using the **dnsaudit.io** API.
-
-</details>
-
-<details>
-  <summary>search_datarake</summary>
-
-* [search_datarake.sh](search_datarake)
-
-This script searches through `.tgz` archives in a given input directory for a **search string** within `daemon.log` files (including rotated and compressed versions).  
-It extracts only the matching log files into a `matched_logs` directory for further analysis, while cleaning up temporary data.
 
 </details>
 
@@ -707,25 +577,6 @@ It then extracts and compares zone details, highlighting when the **zone type** 
 </details>
 
 <details>
-  <summary>umlauts</summary>
-
-* [umlauts.sh](umlauts)
-
-This script searches for files matching a given pattern under a specified directory, repairs double-encoded UTF-8 text, and transliterates German umlauts into ASCII equivalents.
-
-</details>
-
-<details>
-  <summary>zone_from_zips</summary>
-
-* [zone_from_zips.sh](zone_from_zips)
-
-This script searches through a directory of ZIP archives, looks for a **specific zone file** inside each archive,  
-and extracts the matching files into a `_working/` subdirectory.  
-
-</details>
-
-<details>
   <summary>zone_version_diff</summary>
 
 * [zone_version_diff.py](zone_version_diff)
@@ -745,4 +596,174 @@ These two scripts work together to analyze and split DNS zone files into **subzo
 
 </details>
 
----
+## DHCP and Leases
+
+<details>
+  <summary>check_dhcp-options</summary>
+
+* [check_dhcp-options.sh](check_dhcp-options)
+
+This script validates a **Microsoft DHCP XML export** and checks whether each DHCP scope has all critical DHCP options defined.  
+It reports any missing options per scope.
+
+</details>
+
+<details>
+  <summary>count_active_leases</summary>
+
+* [count_active_leases.sh](count_active_leases)
+
+This script parses the ISC DHCP **leases file** and counts:
+- **Active leases (unique IPs)**  
+- **Active clients (unique MAC addresses)**  
+
+</details>
+
+<details>
+  <summary>dhcp-xml_review</summary>
+
+* [dhcp-xml_review.py](dhcp-xml_review)
+
+This Python script parses a **Microsoft DHCP XML export** and generates multiple structured CSV files for analysis.  
+It extracts server-wide options, scopes, reservations, and class assignments (VendorClass/UserClass).  
+
+</details>
+
+<details>
+  <summary>dhcpd_subnet-list</summary>
+
+* [dhcpd_subnet-list.sh](dhcpd_subnet-list)
+
+This script extracts all **subnet definitions** from an ISC DHCP configuration file (`dhcpd.conf`) and exports them into a CSV file.  
+It includes the subnet address, subnet mask, and CIDR notation.
+
+</details>
+
+<details>
+  <summary>dhcpd-conf_review</summary>
+
+* [dhcpd-conf_review.py](dhcpd-conf_review)
+
+Parses an ISC DHCPD configuration file (`dhcpd.conf`) and exports structured CSVs: **Scopes** (subnets / shared-networks), 
+**Reservations** (hosts) and **Options** (global, scope, host). Columns use `number|name` when a DHCP option number is known (e.g., `6|domain_name_servers`).
+
+</details>
+
+<details>
+  <summary>extract_ms-dhcp_macs</summary>
+
+* [extract_ms-dhcp_macs.py](extract_ms-dhcp_macs)
+
+This script extracts MAC-to-IP mappings from a Microsoft DHCP Server XML export.  
+It generates a complete list of all MACs and their associated IPs and a filtered list showing only MACs with multiple IPs.
+
+</details>
+
+<details>
+  <summary>gen_opt-119</summary>
+
+* [gen_opt-119.py](gen_opt-119)
+
+Encodes a list of domain search suffixes into the **RFC 3397 binary format** used for DHCP option 119 (“Domain Search List”).  
+Supports standard compact hex output as well as **Microsoft DHCP “Byte Array”** format (for manual entry in the DHCP MMC).
+
+</details>
+
+<details>
+  <summary>get_vendor-classes</summary>
+
+* [get_vendor-classes.sh](get_vendor-classes)
+
+This script analyzes a **Microsoft DHCP XML export** and extracts information about **Vendor Classes** and their DHCP options.  
+
+</details>
+
+## Parsers and Automation
+
+<details>
+  <summary>check_xmls</summary>
+
+* [check_xmls.sh](check_xmls)
+
+This script scans a given directory for `.zip` files and verifies whether each contains expected DHCP and DNS XML configuration files (`*_dhcp.xml`, `*_dns-config.xml`).
+It logs missing files and errors into separate CSV reports.
+
+</details>
+
+<details>
+  <summary>get_ldap_groups</summary>
+
+* [get_ldap_groups.pl](get_ldap_groups)
+
+A Perl script that connects to an **LDAP/Active Directory** server, searches for a given user, and prints all groups (`memberOf`) the user belongs to.
+
+</details>
+
+<details>
+  <summary>ib_onedb_overview</summary>
+
+* [ib_onedb_overview.py](ib_onedb_overview)
+
+Parses an **Infoblox OneDB** XML export (`onedb.xml`) and generates CSV summaries for **DNS zones** (zone type, primaries, forwarders, AD integration, Dynamic DNS settings) and **DHCP** configuration (networks, ranges, reservations, custom DHCP options). Zones are grouped by DNS view and can be filtered or split per view.
+
+</details>
+
+<details>
+  <summary>jumper</summary>
+
+* [jumper.sh](jumper)
+
+Interactive SSH helper script that allows you to select a server from a list and connect to it.  
+It validates input, checks connectivity, and logs all actions. Useful as a "jumper" or "bastion" tool for quickly connecting to servers from a predefined inventory.
+
+</details>
+
+<details>
+  <summary>parse_ms-dns_xml</summary>
+
+* [parse_ms-dns_xml.py](parse_ms-dns_xml)
+
+Parses a Microsoft DNS XML export file and extracts a **quick overview** of a single server's configuration.
+Extracts Server name, Zone names, Master server IPs, and Global forwarders. Intended as a lightweight helper script for analyzing a **single** XML file.
+
+</details>
+
+<details>
+  <summary>qip_named_normalizer</summary>
+
+* [qip_named_normalizer.sh](qip_named_normalizer)
+
+This script prepares a **QIP-exported BIND/named configuration file** for validation and normalization.  
+QIP configurations often include unsupported or environment-specific directives that can break `named-checkconf`.  
+The script filters those directives, then generates a fully expanded normalized configuration.
+
+</details>
+
+<details>
+  <summary>qip_overview</summary>
+
+* [qip_overview.py](qip_overview)
+
+Generates a compact, operator‑friendly overview of a QIP export (QEF files). It parses the export directory and writes CSV overviews for zones, subnets (v4/v6), ranges, and more.
+DHCP pools and reservations are derived directly from `obj_prof.qef` to match production behavior, with numeric sorting and CIDR‑aware metadata.
+
+</details>
+
+<details>
+  <summary>run_all_servers</summary>
+
+* [run_all_servers.sh](run_all_servers)
+
+This script automates running **SSH commands** or performing **SCP file transfers** across multiple servers from a list.  
+It supports batch execution with optional parallelization, input validation, and logging.
+
+</details>
+
+<details>
+  <summary>run_dnsaudit</summary>
+
+* [run_dnsaudit.sh](run_dnsaudit)
+
+Runs a DNS security scan for a given domain using the **dnsaudit.io** API.
+
+</details>
