@@ -45,7 +45,7 @@ echo "$scan_json" | jq -r '
 '
 
 echo
-echo "# Issues (grouped)"
+echo "# Findings (grouped)"
 echo "$scan_json" | jq -r '
   def arr(x): (x // []);
   def first_sentence(s):
