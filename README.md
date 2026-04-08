@@ -691,6 +691,15 @@ It logs missing files and errors into separate CSV reports.
 </details>
 
 <details>
+  <summary>dns_debug</summary>
+
+* [dns_debug.ps1](dns_debug)
+
+Captures and live-displays incoming DNS queries from Microsoft DNS Server debug logging.
+
+</details>
+
+<details>
   <summary>get_ldap_groups</summary>
 
 * [get_ldap_groups.pl](get_ldap_groups)
