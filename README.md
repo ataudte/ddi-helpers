@@ -351,6 +351,15 @@ It can inject a missing `$ORIGIN` directive if needed, runs BIND’s `named-chec
 </details>
 
 <details>
+  <summary>check_zone_record</summary>
+
+* [check_zone_record.sh](check_zone_record)
+
+This script synchronizes pending DNS zone changes with `rndc sync -clean`, dumps the fully expanded zone content using `named-checkzone`, and filters the output for a specific record name or regular expression.
+
+</details>
+
+<details>
   <summary>compare_zone_variants</summary>
 
 * [compare_zone_variants.sh](compare_zone_variants)
