@@ -284,6 +284,15 @@ A comprehensive DNS health check script that validates delegation, authoritative
 </details>
 
 <details>
+  <summary>dns_zone_diag</summary>
+
+* [dns_zone_diag.sh](dns_zone_diag)
+
+Runs a reproducible diagnostic suite for the **authoritative DNS hosting** of a delegated zone. It compares authoritative name servers over **IPv4 and IPv6**, **UDP and TCP**, with and without **EDNS**, and across different UDP payload sizes. Tests include delegation and zone consistency, TXT truncation, TCP fallback, DNS Cookies, NSID, basic DNSSEC checks, and selected public resolvers.
+
+</details>
+
+<details>
   <summary>flush_jnl</summary>
 
 * [flush_jnl.sh](flush_jnl)
