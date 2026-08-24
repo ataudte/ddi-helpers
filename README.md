@@ -255,6 +255,15 @@ It extracts credentials and association details from the DHCP configuration, con
 </details>
 
 <details>
+  <summary>check_ksk</summary>
+
+* [check_ksk.sh](check_ksk)
+
+The script validates the supplied resolver IP address and key tag, checks basic DNS resolution, converts the decimal key tag to its hexadecimal representation, and performs a trust anchor signaling check using [RFC 8145](https://datatracker.ietf.org/doc/rfc8145/).
+
+</details>
+
+<details>
   <summary>check_ports</summary>
 
 * [check_ports.sh](check_ports)
