@@ -259,7 +259,7 @@ It extracts credentials and association details from the DHCP configuration, con
 
 * [check_ksk.sh](check_ksk)
 
-Checks whether a recursive DNS resolver trusts a given root DNSSEC trust anchor using [RFC 8145](https://datatracker.ietf.org/doc/rfc8145/).
+Checks whether a recursive DNS resolver trusts a given root DNSSEC trust anchor using RFC 8509.
 
 </details>
 

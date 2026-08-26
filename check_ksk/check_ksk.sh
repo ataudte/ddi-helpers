@@ -4,56 +4,98 @@
 # root DNSSEC trust anchor using RFC 8509.
 #
 # Usage:
-#   ./check_ksk.sh <resolver-ip> <key-tag>
+#   ./check_ksk.sh [-v] <resolver-ip> <key-tag>
 #
 # Exit codes:
 #   0  Trust anchor confirmed
 #   1  Trust anchor not confirmed
 #   2  Usage, input, or dependency error
-#   3  Indeterminate or unsupported
+#   3  Indeterminate or no determinate sentinel result
 
 set -u
 
-RESOLVER="${1:-}"
-KEY_TAG="${2:-}"
+VERBOSE=0
+POSITIONAL=()
 
-TEST_DOMAIN="d2a8n3.rootcanary.net."
-BOGUS_NAME="bogus.${TEST_DOMAIN}"
+for arg in "$@"; do
+    case "$arg" in
+        -v)
+            VERBOSE=1
+            ;;
+        *)
+            POSITIONAL+=("$arg")
+            ;;
+    esac
+done
 
-if [[ -z "$RESOLVER" || -z "$KEY_TAG" ]]; then
-    echo "Usage: $0 <resolver-ip> <key-tag>"
+if (( ${#POSITIONAL[@]} != 2 )); then
+    echo "Usage: $0 [-v] <resolver-ip> <key-tag>"
     exit 2
 fi
 
-# Check dependencies.
-for cmd in dig python3; do
+RESOLVER="${POSITIONAL[0]}"
+KEY_TAG="${POSITIONAL[1]}"
+
+CANARY_ZONES=(
+    "d2a1n1.rootcanary.net."
+    "d2a3n1.rootcanary.net."
+    "d2a5n1.rootcanary.net."
+    "d2a6n3.rootcanary.net."
+    "d2a7n3.rootcanary.net."
+    "d2a8n3.rootcanary.net."
+    "d2a10n3.rootcanary.net."
+    "d2a12n3.rootcanary.net."
+    "d2a13n3.rootcanary.net."
+    "d2a14n3.rootcanary.net."
+    "d2a15n3.rootcanary.net."
+    "d2a16n3.rootcanary.net."
+    "d3a1n1.rootcanary.net."
+    "d3a3n1.rootcanary.net."
+    "d3a5n1.rootcanary.net."
+    "d3a6n3.rootcanary.net."
+    "d3a7n3.rootcanary.net."
+    "d3a8n3.rootcanary.net."
+    "d3a10n3.rootcanary.net."
+    "d3a12n3.rootcanary.net."
+    "d3a13n3.rootcanary.net."
+    "d3a14n3.rootcanary.net."
+    "d3a15n3.rootcanary.net."
+    "d3a16n3.rootcanary.net."
+    "d4a1n1.rootcanary.net."
+    "d4a3n1.rootcanary.net."
+    "d4a5n1.rootcanary.net."
+    "d4a6n3.rootcanary.net."
+    "d4a7n3.rootcanary.net."
+    "d4a8n3.rootcanary.net."
+    "d4a10n3.rootcanary.net."
+    "d4a12n3.rootcanary.net."
+    "d4a13n3.rootcanary.net."
+    "d4a14n3.rootcanary.net."
+    "d4a15n3.rootcanary.net."
+    "d4a16n3.rootcanary.net."
+)
+
+for cmd in dig python3 awk; do
     if ! command -v "$cmd" >/dev/null 2>&1; then
-        echo "ERROR: $cmd is required"
+        echo "Error: $cmd Is Required"
         exit 2
     fi
 done
 
-# Validate the resolver address.
 if ! python3 -c \
     'import ipaddress, sys; ipaddress.ip_address(sys.argv[1])' \
     "$RESOLVER" 2>/dev/null; then
-    echo "ERROR: resolver must be a valid IPv4 or IPv6 address"
+    echo "Error: Resolver Must Be A Valid IPv4 Or IPv6 Address"
     exit 2
 fi
 
-# Validate the key tag.
 if ! [[ "$KEY_TAG" =~ ^[0-9]+$ ]] || (( KEY_TAG < 0 || KEY_TAG > 65535 )); then
-    echo "ERROR: key tag must be an integer between 0 and 65535"
+    echo "Error: Key Tag Must Be An Integer Between 0 And 65535"
     exit 2
 fi
 
-# Format the key tag for the sentinel labels.
 printf -v KEY_TAG_PADDED "%05d" "$KEY_TAG"
 
-IS_TA_NAME="root-key-sentinel-is-ta-${KEY_TAG_PADDED}.${TEST_DOMAIN}"
-NOT_TA_NAME="root-key-sentinel-not-ta-${KEY_TAG_PADDED}.${TEST_DOMAIN}"
-
-# Execute a query and extract the response status and answer count.
 query_dns() {
     local name="$1"
     shift
@@ -105,151 +147,218 @@ query_dns() {
     QUERY_ANSWERS="${QUERY_ANSWERS:-0}"
 }
 
-# Check whether a response contains an A RRset.
 has_answer() {
     [[ "$1" == "NOERROR" && "$2" -gt 0 ]]
 }
 
-echo "  "
-echo "## Check DNSSEC Trust Anchor"
-echo "   Resolver: $RESOLVER"
-echo "   Key Tag:  $KEY_TAG"
-echo "  "
+progress_bar() {
+    local current="$1"
+    local total="$2"
+    local width=40
+    local filled=$(( current * width / total ))
+    local empty=$(( width - filled ))
+    local bar=""
+    local spaces=""
 
-# Check DNS resolution.
+    printf -v bar "%${filled}s"
+    bar="${bar// /#}"
+
+    printf -v spaces "%${empty}s"
+
+    printf "\rTesting Canary Zones: [%-40s] %3d%% (%d/%d)" \
+        "${bar}${spaces}" \
+        $(( current * 100 / total )) \
+        "$current" \
+        "$total"
+}
+
+declare -a RESULTS
+declare -a DETAILS
+
+TOTAL=${#CANARY_ZONES[@]}
+DNSSEC_ELIGIBLE=0
+BASELINE_FAILED=0
+UNREACHABLE=0
+TRUSTED=0
+NOT_TRUSTED=0
+SENTINEL_NOT_OBSERVED=0
+INDETERMINATE=0
+
+echo
+echo "## Check DNSSEC Trust Anchor"
+echo "   Resolver:     $RESOLVER"
+echo "   Key Tag:      $KEY_TAG"
+echo "   Canary Zones: $TOTAL"
+echo "   Verbose:      $([[ "$VERBOSE" -eq 1 ]] && echo "Enabled" || echo "Disabled")"
+echo
+
 echo "// DNS Resolution Check"
 echo "   dig @${RESOLVER} . SOA +time=3 +tries=1 +short"
 
 if ! dig @"$RESOLVER" . SOA +time=3 +tries=1 +short >/dev/null 2>&1; then
     echo "   DNS Resolution: FAIL"
-    echo "  "
+    echo
     exit 1
 fi
 
 echo "   DNS Resolution: PASS"
-echo "  "
+echo
 
-# Query a deliberately bogus DNSSEC name.
-echo "// DNSSEC Validation Check"
-echo "   dig @${RESOLVER} ${BOGUS_NAME} A +dnssec +time=3 +tries=1"
+index=0
 
-query_dns "$BOGUS_NAME"
+for zone in "${CANARY_ZONES[@]}"; do
+    secure_name="secure.${zone}"
+    bogus_name="bogus.${zone}"
+    is_ta_name="root-key-sentinel-is-ta-${KEY_TAG_PADDED}.${zone}"
+    not_ta_name="root-key-sentinel-not-ta-${KEY_TAG_PADDED}.${zone}"
 
-BOGUS_STATUS="$QUERY_STATUS"
-BOGUS_ANSWERS="$QUERY_ANSWERS"
+    query_dns "$secure_name"
+    secure_status="$QUERY_STATUS"
+    secure_answers="$QUERY_ANSWERS"
 
-echo "   Status:  $BOGUS_STATUS"
-echo "   Answers: $BOGUS_ANSWERS"
-echo "  "
+    query_dns "$bogus_name"
+    bogus_status="$QUERY_STATUS"
+    bogus_answers="$QUERY_ANSWERS"
 
-# Query the positive trust anchor sentinel.
-echo "// RFC 8509 is-ta Check"
-echo "   dig @${RESOLVER} ${IS_TA_NAME} A +dnssec +time=3 +tries=1"
+    if [[ "$secure_status" == "ERROR" || "$bogus_status" == "ERROR" ]]; then
+        result="ERROR"
+        detail="Secure=${secure_status}/${secure_answers}, Bogus=${bogus_status}/${bogus_answers}"
+        ((UNREACHABLE+=1))
+    elif ! has_answer "$secure_status" "$secure_answers" || [[ "$bogus_status" != "SERVFAIL" ]]; then
+        result="BASELINE_FAILED"
+        detail="Secure=${secure_status}/${secure_answers}, Bogus=${bogus_status}/${bogus_answers}"
+        ((BASELINE_FAILED+=1))
+    else
+        ((DNSSEC_ELIGIBLE+=1))
 
-query_dns "$IS_TA_NAME"
+        query_dns "$is_ta_name"
+        is_ta_status="$QUERY_STATUS"
+        is_ta_answers="$QUERY_ANSWERS"
 
-IS_TA_STATUS="$QUERY_STATUS"
-IS_TA_ANSWERS="$QUERY_ANSWERS"
+        query_dns "$not_ta_name"
+        not_ta_status="$QUERY_STATUS"
+        not_ta_answers="$QUERY_ANSWERS"
 
-echo "   Status:  $IS_TA_STATUS"
-echo "   Answers: $IS_TA_ANSWERS"
-echo "  "
+        detail="Secure=${secure_status}/${secure_answers}, Bogus=${bogus_status}/${bogus_answers}, Is-Ta=${is_ta_status}/${is_ta_answers}, Not-Ta=${not_ta_status}/${not_ta_answers}"
 
-# Query the negative trust anchor sentinel.
-echo "// RFC 8509 not-ta Check"
-echo "   dig @${RESOLVER} ${NOT_TA_NAME} A +dnssec +time=3 +tries=1"
+        if has_answer "$is_ta_status" "$is_ta_answers" && [[ "$not_ta_status" == "SERVFAIL" ]]; then
+            result="TRUSTED"
+            ((TRUSTED+=1))
+        elif [[ "$is_ta_status" == "SERVFAIL" ]] && has_answer "$not_ta_status" "$not_ta_answers"; then
+            result="NOT_TRUSTED"
+            ((NOT_TRUSTED+=1))
+        elif has_answer "$is_ta_status" "$is_ta_answers" && has_answer "$not_ta_status" "$not_ta_answers"; then
+            result="SENTINEL_NOT_OBSERVED"
+            ((SENTINEL_NOT_OBSERVED+=1))
+        else
+            result="INDETERMINATE"
+            ((INDETERMINATE+=1))
+        fi
+    fi
 
-query_dns "$NOT_TA_NAME"
+    RESULTS[index]="$result"
+    DETAILS[index]="$detail"
 
-NOT_TA_STATUS="$QUERY_STATUS"
-NOT_TA_ANSWERS="$QUERY_ANSWERS"
+    ((index+=1))
+    progress_bar "$index" "$TOTAL"
+done
 
-echo "   Status:  $NOT_TA_STATUS"
-echo "   Answers: $NOT_TA_ANSWERS"
-echo "  "
+printf "\n"
 
-# Classify the resolver behavior.
-if [[ "$BOGUS_STATUS" == "SERVFAIL" ]] &&
-   has_answer "$IS_TA_STATUS" "$IS_TA_ANSWERS" &&
-   [[ "$NOT_TA_STATUS" == "SERVFAIL" ]]; then
-
-    echo "## Result"
-    echo "   DNSSEC Validation: PASS"
-    echo "   RFC 8509:          SUPPORTED"
-    echo "   Trust Anchor:      PASS"
-    echo "  "
-    exit 0
-
-elif [[ "$BOGUS_STATUS" == "SERVFAIL" ]] &&
-     [[ "$IS_TA_STATUS" == "SERVFAIL" ]] &&
-     has_answer "$NOT_TA_STATUS" "$NOT_TA_ANSWERS"; then
-
-    echo "## Result"
-    echo "   DNSSEC Validation: PASS"
-    echo "   RFC 8509:          SUPPORTED"
-    echo "   Trust Anchor:      FAIL"
-    echo "  "
-    exit 1
-
-elif [[ "$BOGUS_STATUS" == "SERVFAIL" ]] &&
-     has_answer "$IS_TA_STATUS" "$IS_TA_ANSWERS" &&
-     has_answer "$NOT_TA_STATUS" "$NOT_TA_ANSWERS"; then
-
-    echo "## Result"
-    echo "   DNSSEC Validation: PASS"
-    echo "   RFC 8509:          NOT SUPPORTED"
-    echo "   Trust Anchor:      INDETERMINATE"
-    echo "  "
-    exit 3
-
-elif has_answer "$BOGUS_STATUS" "$BOGUS_ANSWERS" &&
-     has_answer "$IS_TA_STATUS" "$IS_TA_ANSWERS" &&
-     has_answer "$NOT_TA_STATUS" "$NOT_TA_ANSWERS"; then
-
-    echo "## Result"
-    echo "   DNSSEC Validation: FAIL"
-    echo "   RFC 8509:          NOT APPLICABLE"
-    echo "   Trust Anchor:      NOT CONFIRMED"
-    echo "  "
-    exit 1
+if (( VERBOSE == 1 )); then
+    echo
+    echo "// Canary Zone Results"
+    printf "   %-30s %-16s\n" "Zone" "Result"
+    printf "   %-30s %-16s\n" "------------------------------" "----------------"
+    for i in "${!CANARY_ZONES[@]}"; do
+        printf "   %-30s %-16s\n" "${CANARY_ZONES[$i]}" "${RESULTS[$i]}"
+    done
 fi
 
-# Verify the underlying sentinel records without sentinel processing.
-echo "// Test Infrastructure Check"
-echo "   dig @${RESOLVER} ${IS_TA_NAME} A +dnssec +cd +time=3 +tries=1"
+SUPPORTED=$(( TRUSTED + NOT_TRUSTED ))
+DETERMINATE=$SUPPORTED
+MAJORITY=0
 
-query_dns "$IS_TA_NAME" +cd
-
-CD_IS_TA_STATUS="$QUERY_STATUS"
-CD_IS_TA_ANSWERS="$QUERY_ANSWERS"
-
-echo "   is-ta Status:  $CD_IS_TA_STATUS"
-echo "   is-ta Answers: $CD_IS_TA_ANSWERS"
-
-echo "   dig @${RESOLVER} ${NOT_TA_NAME} A +dnssec +cd +time=3 +tries=1"
-
-query_dns "$NOT_TA_NAME" +cd
-
-CD_NOT_TA_STATUS="$QUERY_STATUS"
-CD_NOT_TA_ANSWERS="$QUERY_ANSWERS"
-
-echo "   not-ta Status:  $CD_NOT_TA_STATUS"
-echo "   not-ta Answers: $CD_NOT_TA_ANSWERS"
-echo "  "
-
-if ! has_answer "$CD_IS_TA_STATUS" "$CD_IS_TA_ANSWERS" ||
-   ! has_answer "$CD_NOT_TA_STATUS" "$CD_NOT_TA_ANSWERS"; then
-
-    echo "## Result"
-    echo "   Test Infrastructure: FAIL"
-    echo "   Trust Anchor:        INDETERMINATE"
-    echo "  "
-    exit 3
+if (( DETERMINATE > 0 )); then
+    if (( TRUSTED >= NOT_TRUSTED )); then
+        MAJORITY="$TRUSTED"
+    else
+        MAJORITY="$NOT_TRUSTED"
+    fi
+    TRUST_CONSENSUS=$(( MAJORITY * 100 / DETERMINATE ))
+else
+    TRUST_CONSENSUS=0
 fi
 
+if (( DNSSEC_ELIGIBLE > 0 )); then
+    TEST_COVERAGE=$(( DETERMINATE * 100 / DNSSEC_ELIGIBLE ))
+else
+    TEST_COVERAGE=0
+fi
+
+echo
+echo "// Candidate Filtering"
+printf "   %-24s %d\n" "Total Canary Zones:" "$TOTAL"
+printf "   %-24s %d\n" "DNSSEC Eligible:" "$DNSSEC_ELIGIBLE"
+printf "   %-24s %d\n" "Baseline Failed:" "$BASELINE_FAILED"
+printf "   %-24s %d\n" "Unreachable/Error:" "$UNREACHABLE"
+
+echo
+echo "// RFC 8509 Sentinel Results"
+printf "   %-28s %d\n" "Determinate Tests:" "$DETERMINATE"
+printf "   %-28s %d\n" "Trusted:" "$TRUSTED"
+printf "   %-28s %d\n" "Not Trusted:" "$NOT_TRUSTED"
+printf "   %-28s %d\n" "Sentinel Not Observed:" "$SENTINEL_NOT_OBSERVED"
+printf "   %-28s %d\n" "Indeterminate:" "$INDETERMINATE"
+
+echo
 echo "## Result"
-echo "   Test Infrastructure: PASS"
-echo "   RFC 8509:            INDETERMINATE"
-echo "   Trust Anchor:        INDETERMINATE"
-echo "  "
-exit 3
+
+if (( DETERMINATE == 0 )); then
+    OVERALL_RESULT="INDETERMINATE"
+    EXIT_CODE=3
+elif (( TRUSTED > NOT_TRUSTED )); then
+    OVERALL_RESULT="TRUSTED"
+    EXIT_CODE=0
+elif (( NOT_TRUSTED > TRUSTED )); then
+    OVERALL_RESULT="NOT_TRUSTED"
+    EXIT_CODE=1
+else
+    OVERALL_RESULT="INDETERMINATE"
+    EXIT_CODE=3
+fi
+
+printf "   %-20s %s\n" "Overall Result:" "$OVERALL_RESULT"
+printf "   %-20s %d%% (%d/%d)\n" "Trust Consensus:" "$TRUST_CONSENSUS" "$MAJORITY" "$DETERMINATE"
+printf "   %-20s %d%% (%d/%d)\n" "Test Coverage:" "$TEST_COVERAGE" "$DETERMINATE" "$DNSSEC_ELIGIBLE"
+
+if (( VERBOSE == 1 )); then
+    echo
+    echo "// Excluded Or Divergent Zones"
+
+    printed=0
+
+    for i in "${!CANARY_ZONES[@]}"; do
+        result="${RESULTS[$i]}"
+
+        if [[ "$result" == "BASELINE_FAILED" ||
+              "$result" == "ERROR" ||
+              "$result" == "SENTINEL_NOT_OBSERVED" ||
+              "$result" == "INDETERMINATE" ||
+              ( "$OVERALL_RESULT" == "TRUSTED" && "$result" == "NOT_TRUSTED" ) ||
+              ( "$OVERALL_RESULT" == "NOT_TRUSTED" && "$result" == "TRUSTED" ) ]]; then
+
+            echo "   ${CANARY_ZONES[$i]}"
+            echo "      Result:  $result"
+            echo "      Details: ${DETAILS[$i]}"
+            printed=1
+        fi
+    done
+
+    if (( printed == 0 )); then
+        echo "   None"
+    fi
+fi
+
+echo
+exit "$EXIT_CODE"
