@@ -533,6 +533,17 @@ It separates forward and reverse zones, cleans Microsoft DNS artifacts, canonica
 </details>
 
 <details>
+  <summary>ns_watch</summary>
+
+* [ns_watch.sh](ns_watch)
+
+Interactive console **DNS status monitor for macOS (Bash 3.2+)**. It monitors a single zone or a list of zones, checks NS records, resolves name-server IPv4/IPv6 addresses, and queries each name server directly for its SOA serial. Coloured traffic lights show the combined status; differing serials and query errors are highlighted in red, with successful query times displayed in milliseconds.
+
+Inspired by Carsten's [DNS-traffic-lights](https://github.com/cstrotm/DNS-traffic-lights).
+
+</details>
+
+<details>
   <summary>nslookup_bulk</summary>
 
 * [nslookup_bulk.bat](nslookup_bulk)
