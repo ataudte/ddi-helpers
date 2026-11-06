@@ -472,6 +472,15 @@ Interactive DNS watch tool that *paces itself by the observed TTL*. It runs repe
 </details>
 
 <details>
+  <summary>dns_watch</summary>
+
+* [dns_watch.sh](helpers/dns_watch)
+
+Interactive console watches a list of domains from a CSV file, queries their records directly on the authoritative name servers, checks the registry delegation and WHOIS data, and reports every change as added, removed or modified with a severity.
+
+</details>
+
+<details>
   <summary>dublicated_entries</summary>
 
 * [dublicated_entries.sh](helpers/dublicated_entries)
